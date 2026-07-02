@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>타점 打點 — 결단의 순간</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* 먹과 한지 */
+    --paper: #f2ede1;        /* 한지 크림 */
+    --paper-2: #ebe4d4;      /* 조금 짙은 한지 */
+    --paper-3: #e2d9c4;      /* 카드 음영 */
+    --ink: #211d18;          /* 먹색 */
+    --ink-2: #514a3f;        /* 옅은 먹 */
+    --ink-3: #8a7f6d;        /* 흐린 먹 */
+    --ink-line: #c8bda4;     /* 한지 위 선 */
+    --cinnabar: #a8352a;     /* 주사 빨강 */
+    --cinnabar-deep: #7d2119;/* 짙은 주사 */
+    --seal: #b23a2e;         /* 낙관 인주 */
+    --gold: #9c7a2e;         /* 금니 (절제) */
+    --font-serif: 'Noto Serif KR', 'Apple SD Gothic Neo', serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    background: #4a4238;
+    font-family: var(--font-serif);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    display: flex; justify-content: center; min-height: 100vh;
+  }
+
+  .phone {
+    width: 100%; max-width: 420px; min-height: 100vh;
+    background: var(--paper);
+    position: relative; display: flex; flex-direction: column; overflow: hidden;
+    background-image:
+      repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(180,168,140,0.05) 2px, rgba(180,168,140,0.05) 3px);
+  }
+  @media (min-width: 440px) {
+    .phone {
+      margin: 24px 0; min-height: calc(100vh - 48px);
+      box-shadow: 0 12px 48px rgba(0,0,0,0.4);
+    }
+    body { align-items: flex-start; }
+  }
+
+  /* 상단 바 */
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 24px 14px; position: sticky; top: 0; z-index: 20;
+    background: var(--paper);
+  }
+  .topbar .back {
+    width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
+    font-size: 24px; color: var(--ink); cursor: pointer; font-weight: 300;
+  }
+  .topbar .title { font-size: 15px; font-weight: 500; letter-spacing: 4px; color: var(--ink-2); }
+  .topbar .spacer { width: 30px; }
+
+  .screen { flex: 1; display: none; flex-direction: column; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  .screen.active { display: flex; }
+
+  /* ===== 홈 히어로 (토스st 포맷) ===== */
+  .home-hero-toss {
+    padding: 24px 28px 8px; text-align: left; position: relative; overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Pretendard', 'Segoe UI', sans-serif;
+  }
+  .hero-row { display: block; position: relative; z-index: 2; }
+  .hero-copy { max-width: 74%; }
+  .hero-dosang {
+    position: absolute; top: -34px; right: -46px;
+    width: 210px; height: 210px; z-index: 1; opacity: 0.55;
+    pointer-events: none;
+  }
+  .home-hero-toss .home-desc { position: relative; z-index: 2; }
+  .home-hero-toss .brand-mark {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 20px; font-weight: 800; letter-spacing: -0.5px; color: var(--ink);
+  }
+  .home-hero-toss .brand-dot {
+    width: 22px; height: 22px; border-radius: 50%; background: var(--ink);
+    position: relative; display: inline-flex; align-items: center; justify-content: center;
+  }
+  .home-hero-toss .brand-dot::after { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--paper); }
+  .home-hero-toss .home-title {
+    font-size: 27px; font-weight: 800; line-height: 1.32; letter-spacing: -0.8px;
+    margin-top: 22px; color: var(--ink); text-align: left;
+  }
+  .home-hero-toss .home-desc {
+    color: var(--ink-3); font-size: 15px; margin-top: 12px; line-height: 1.55; letter-spacing: -0.2px; font-weight: 400; text-align: left;
+  }
+
+  /* ===== 카테고리 섹션 (핵심 · 무게 있게) ===== */
+  .cat-section { margin-top: 28px; }
+  .cat-section-head { margin-bottom: 20px; }
+  .cat-section-head h2 {
+    font-size: 20px; font-weight: 700; letter-spacing: 0.5px; color: var(--ink);
+  }
+  .cat-section-head p {
+    font-size: 13px; color: var(--ink-3); margin-top: 8px; letter-spacing: 0.3px;
+  }
+
+  /* ===== 육임 소개 ===== */
+  .about-liuren {
+    padding: 24px 22px; margin-top: 8px;
+    background: var(--paper-2); border-radius: 2px;
+  }
+  .about-liuren .al-lead {
+    font-size: 15px; line-height: 1.85; color: var(--ink-2); letter-spacing: 0.3px; text-align: left;
+  }
+  .about-liuren .al-lead strong { color: var(--ink); font-weight: 700; }
+  .al-points { margin: 24px 0; display: flex; flex-direction: column; gap: 20px; }
+  .al-point { display: flex; gap: 16px; align-items: flex-start; }
+  .al-point .al-hanja {
+    width: 40px; height: 40px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; font-weight: 600; color: var(--cinnabar);
+    border: 1px solid var(--cinnabar); border-radius: 4px;
+  }
+  .al-point .al-text { padding-top: 1px; }
+  .al-point .al-text strong { display: block; font-size: 15px; font-weight: 600; letter-spacing: 0.5px; }
+  .al-point .al-text span { display: block; font-size: 13px; color: var(--ink-3); line-height: 1.7; margin-top: 5px; letter-spacing: 0.2px; }
+  .about-liuren .al-note {
+    font-size: 13px; line-height: 1.85; color: var(--ink-3); letter-spacing: 0.2px;
+    padding: 18px; border: 1px solid var(--ink-line); text-align: left;
+  }
+
+  /* ===== 홈 (먹 원형) ===== */
+  .home-hero { padding: 36px 32px 8px; text-align: center; }
+  .brand-seal {
+    display: inline-flex; flex-direction: column; align-items: center; gap: 14px;
+  }
+  .seal-mark {
+    width: 76px; height: 76px; border: 2px solid var(--cinnabar);
+    border-radius: 8px; display: flex; align-items: center; justify-content: center;
+    position: relative; background: var(--cinnabar);
+  }
+  .seal-mark span {
+    font-size: 40px; font-weight: 700; color: var(--paper); line-height: 1;
+    letter-spacing: -2px;
+  }
+  .brand-name { font-size: 15px; letter-spacing: 8px; color: var(--ink-2); font-weight: 500; padding-left: 8px; }
+
+  .home-verse {
+    margin-top: 40px; text-align: center;
+  }
+  .home-verse h1 {
+    font-size: 26px; font-weight: 600; line-height: 1.75; letter-spacing: 1px; color: var(--ink);
+  }
+  .home-verse .divider {
+    width: 28px; height: 1px; background: var(--cinnabar); margin: 22px auto;
+  }
+  .home-verse p {
+    font-size: 14px; color: var(--ink-3); line-height: 1.9; font-weight: 400; letter-spacing: 0.5px;
+  }
+
+  .pad { padding: 8px 28px 28px; }
+  .section-label {
+    font-size: 12px; letter-spacing: 3px; color: var(--ink-3); font-weight: 500;
+    margin: 40px 4px 18px; text-align: center; position: relative;
+  }
+  .section-label::before, .section-label::after {
+    content: ''; position: absolute; top: 50%; width: 40px; height: 1px; background: var(--ink-line);
+  }
+  .section-label::before { left: 30px; }
+  .section-label::after { right: 30px; }
+
+  /* 카테고리 - 또렷한 카드 (핵심 행동) */
+  .cat-grid { display: flex; flex-direction: column; gap: 10px; }
+  .cat-card {
+    display: flex; align-items: center; gap: 18px; padding: 18px 18px;
+    cursor: pointer; background: var(--paper); border: 1px solid var(--ink);
+    border-radius: 2px; transition: background .2s, transform .12s;
+  }
+  .cat-card:active { background: var(--paper-2); transform: scale(0.99); }
+  .cat-hanja {
+    width: 46px; height: 46px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px; font-weight: 600; color: var(--paper);
+    background: var(--cinnabar); border-radius: 3px;
+  }
+  .cat-text h3 { font-size: 17px; font-weight: 600; letter-spacing: 1px; }
+  .cat-text p { font-size: 12px; color: var(--ink-3); margin-top: 4px; letter-spacing: 0.5px; }
+  .cat-arrow { margin-left: auto; color: var(--ink); font-size: 22px; font-weight: 300; }
+
+  .recent {
+    display: flex; align-items: center; gap: 14px; padding: 16px;
+    border: 1px solid var(--ink-line); cursor: pointer; background: var(--paper);
+  }
+  .recent:active { background: var(--paper-2); }
+  .recent .r-verdict {
+    font-size: 15px; font-weight: 700; flex-shrink: 0;
+    width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
+    border: 1.5px solid; border-radius: 4px;
+  }
+  .r-yes { color: var(--ink); border-color: var(--ink); }
+  .r-no { color: var(--cinnabar); border-color: var(--cinnabar); }
+  .r-wait { color: var(--gold); border-color: var(--gold); }
+  .recent .r-q { font-size: 14px; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; letter-spacing: 0.3px; }
+
+  /* ===== 입력 ===== */
+  .input-head { padding: 20px 32px 0; text-align: center; }
+  .input-head .cat-badge {
+    display: inline-block; font-size: 13px; letter-spacing: 3px; color: var(--cinnabar);
+    font-weight: 500; padding-bottom: 8px; border-bottom: 1px solid var(--cinnabar);
+  }
+  .input-head h2 { font-size: 21px; font-weight: 600; margin-top: 28px; line-height: 1.6; letter-spacing: 1px; }
+  .input-head .sub { font-size: 13px; color: var(--ink-3); margin-top: 12px; letter-spacing: 0.5px; }
+
+  .q-box { margin: 32px 32px 0; }
+  textarea.q-input {
+    width: 100%; min-height: 130px; resize: none; background: transparent;
+    border: none; border-bottom: 1.5px solid var(--ink-line);
+    padding: 8px 4px 16px; font-family: var(--font-serif); font-size: 18px;
+    color: var(--ink); line-height: 1.7; letter-spacing: 0.5px; text-align: center;
+  }
+  textarea.q-input:focus { outline: none; border-bottom-color: var(--cinnabar); }
+  textarea.q-input::placeholder { color: var(--ink-3); font-weight: 300; }
+  .char-count { text-align: center; font-size: 11px; color: var(--ink-3); margin-top: 12px; letter-spacing: 1px; }
+
+  .example-chips { display: flex; flex-wrap: wrap; gap: 10px; margin: 28px 32px 0; justify-content: center; }
+  .chip {
+    font-size: 13px; color: var(--ink-2); padding: 8px 16px; cursor: pointer;
+    border: 1px solid var(--ink-line); border-radius: 20px; letter-spacing: 0.3px;
+    transition: all .15s; background: var(--paper);
+  }
+  .chip:active { border-color: var(--cinnabar); color: var(--cinnabar); }
+
+  /* ===== 점시 · 생년월일 메타 ===== */
+  .ipt-meta { margin: 32px 32px 0; display: flex; flex-direction: column; gap: 10px; }
+  .meta-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 16px; border: 1px solid var(--ink-line); border-radius: 2px;
+  }
+  .meta-birth { cursor: pointer; transition: background .15s; }
+  .meta-birth:active { background: var(--paper-2); }
+  .meta-left { display: flex; align-items: center; gap: 14px; }
+  .meta-hanja {
+    width: 34px; height: 34px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 600; color: var(--cinnabar);
+    border: 1px solid var(--cinnabar); border-radius: 3px;
+  }
+  .meta-text strong { display: block; font-size: 14px; font-weight: 600; letter-spacing: 0.5px; }
+  .meta-text span { display: block; font-size: 12px; color: var(--ink-3); margin-top: 3px; letter-spacing: 0.2px; }
+  .meta-badge {
+    font-size: 11px; font-weight: 600; color: var(--ink-3);
+    border: 1px solid var(--ink-line); padding: 4px 10px; border-radius: 20px; letter-spacing: 1px;
+  }
+  .meta-arrow { font-size: 20px; color: var(--ink-3); font-weight: 300; width: 24px; text-align: center; }
+  .birth-fields { display: none; flex-direction: column; gap: 10px; padding: 0 2px; }
+  .birth-fields.open { display: flex; }
+  .birth-input {
+    width: 100%; padding: 13px 14px; font-family: var(--font-serif); font-size: 15px;
+    color: var(--ink); background: var(--paper); border: 1px solid var(--ink-line);
+    border-radius: 2px; -webkit-appearance: none; appearance: none;
+  }
+  .birth-input:focus { outline: none; border-color: var(--cinnabar); }
+  select.birth-input {
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%238a7f6d' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 14px center;
+  }
+
+  .cta-wrap {
+    padding: 20px 32px calc(24px + env(safe-area-inset-bottom));
+    position: sticky; bottom: 0; background: var(--paper);
+  }
+  .btn {
+    width: 100%; padding: 17px; border: none; font-family: var(--font-serif);
+    font-size: 16px; font-weight: 600; cursor: pointer; letter-spacing: 4px;
+    transition: transform .1s, opacity .2s;
+  }
+  .btn:active { transform: scale(0.985); }
+  .btn-primary { background: var(--ink); color: var(--paper); }
+  .btn-primary:disabled { background: var(--paper-3); color: var(--ink-3); cursor: not-allowed; }
+  .btn-ghost { background: transparent; color: var(--ink); border: 1px solid var(--ink); }
+
+  /* ===== 점 치는 중 ===== */
+  .casting { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 44px; padding: 40px; }
+  /* 식반(式盤): 천반이 지반 위에서 회전 */
+  .cast-plate { position: relative; width: 168px; height: 168px; }
+  .plate-ring {
+    position: absolute; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  }
+  /* 지반(地盤) — 바깥 고정 원, 십이지 */
+  .plate-earth {
+    inset: 0; border: 1.5px solid var(--ink-line);
+  }
+  .plate-earth .glyph { color: var(--ink-3); }
+  /* 천반(天盤) — 안쪽 회전 원 */
+  .plate-heaven {
+    inset: 30px; border: 1.5px solid var(--cinnabar);
+    animation: plateSpin 3.6s cubic-bezier(0.45,0,0.15,1) infinite;
+  }
+  .plate-heaven .glyph { color: var(--cinnabar); font-weight: 600; }
+  /* 중심 태극점 */
+  .plate-core {
+    position: absolute; inset: 0; margin: auto; width: 12px; height: 12px;
+    border-radius: 50%; background: var(--ink);
+  }
+  .plate-ring .glyph {
+    position: absolute; font-family: var(--font-serif); font-size: 13px; line-height: 1;
+  }
+  @keyframes plateSpin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  /* 천반 글자: 판이 도는 동안 글자는 정립 유지 (역회전) */
+  .plate-heaven .glyph { animation: glyphCounter 3.6s cubic-bezier(0.45,0,0.15,1) infinite; }
+  @keyframes glyphCounter {
+    0% { transform: translate(-50%,-50%) rotate(0deg); }
+    100% { transform: translate(-50%,-50%) rotate(-360deg); }
+  }
+  .cast-text { text-align: center; }
+  .cast-text .l1 { font-size: 18px; font-weight: 600; letter-spacing: 2px; }
+  .cast-text .l2 { font-size: 13px; color: var(--ink-3); margin-top: 10px; letter-spacing: 1px; }
+
+  /* ===== 결과 ===== */
+  .result-hero { padding: 44px 32px 32px; text-align: center; position: relative; }
+  .verdict-hanja {
+    font-size: 88px; font-weight: 900; line-height: 1; letter-spacing: -2px; margin-bottom: 8px;
+  }
+  .verdict-main { font-size: 26px; font-weight: 600; letter-spacing: 1px; line-height: 1.5; }
+  .verdict-sub { font-size: 14px; color: var(--ink-2); margin-top: 18px; line-height: 1.85; letter-spacing: 0.5px; }
+  .v-yes .verdict-hanja { color: var(--ink); }
+  .v-no .verdict-hanja { color: var(--cinnabar); }
+  .v-wait .verdict-hanja { color: var(--gold); }
+  .hero-rule { width: 40px; height: 1px; background: var(--ink-line); margin: 28px auto 0; }
+
+  .q-recall {
+    margin: 0 32px 28px; padding: 18px; text-align: center;
+    border-top: 1px solid var(--ink-line); border-bottom: 1px solid var(--ink-line);
+  }
+  .q-recall span { color: var(--ink-3); font-size: 11px; letter-spacing: 2px; display: block; margin-bottom: 8px; }
+  .q-recall div { font-size: 15px; color: var(--ink); letter-spacing: 0.3px; }
+
+  /* 프리미엄 블록 */
+  .premium-block { margin: 0 32px 20px; }
+  .premium-card { border: 1px solid var(--ink-line); position: relative; background: var(--paper); }
+  .premium-header {
+    display: flex; align-items: center; gap: 12px; padding: 16px 18px;
+    border-bottom: 1px solid var(--ink-line);
+  }
+  .premium-header .ph-hanja {
+    font-size: 20px; font-weight: 600; color: var(--cinnabar);
+    width: 30px; text-align: center;
+  }
+  .premium-header h3 { font-size: 15px; font-weight: 600; letter-spacing: 1px; }
+  .premium-header .ph-tag {
+    margin-left: auto; font-size: 10px; font-weight: 600; color: var(--cinnabar);
+    border: 1px solid var(--cinnabar); padding: 3px 8px; letter-spacing: 1px;
+  }
+  .premium-body { padding: 20px; font-size: 14px; line-height: 1.9; color: var(--ink-2); letter-spacing: 0.3px; }
+  .premium-body strong { color: var(--ink); font-weight: 700; }
+  .locked .premium-body { filter: blur(5px); user-select: none; pointer-events: none; min-height: 90px; }
+  .lock-overlay {
+    position: absolute; inset: 0; top: 54px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+    background: rgba(242,237,225,0.55);
+  }
+  .lock-overlay .lock-seal {
+    font-size: 13px; font-weight: 600; color: var(--cinnabar); letter-spacing: 1px;
+    border: 1px solid var(--cinnabar); padding: 6px 14px; border-radius: 2px;
+  }
+
+  .paywall-cta { margin: 8px 32px 24px; padding: 28px 24px; background: var(--ink); text-align: center; }
+  .paywall-cta h3 { color: var(--paper); font-size: 18px; font-weight: 600; letter-spacing: 2px; }
+  .paywall-cta p { color: rgba(242,237,225,0.65); font-size: 13px; margin-top: 12px; line-height: 1.8; letter-spacing: 0.5px; }
+  .paywall-cta .pw-price { color: var(--paper); font-size: 13px; margin-top: 18px; letter-spacing: 1px; }
+  .paywall-cta .pw-price span { color: #d9a441; font-weight: 600; }
+  .paywall-cta button {
+    margin-top: 18px; width: 100%; padding: 15px; background: var(--cinnabar); color: var(--paper);
+    border: none; font-family: var(--font-serif); font-size: 15px; font-weight: 600;
+    cursor: pointer; letter-spacing: 3px;
+  }
+  .paywall-cta button:active { transform: scale(0.985); }
+  .paywall-cta .pw-note { color: rgba(242,237,225,0.45); font-size: 11px; margin-top: 12px; letter-spacing: 1px; }
+
+  .disclaimer { margin: 8px 32px 24px; font-size: 11px; color: var(--ink-3); text-align: center; line-height: 1.9; letter-spacing: 0.5px; }
+  .result-actions { display: flex; gap: 12px; padding: 8px 32px 32px; }
+  .result-actions .btn { flex: 1; font-size: 14px; letter-spacing: 2px; padding: 15px; }
+
+  /* ===== 기록 ===== */
+  .stat-hero { margin: 20px 32px 8px; padding: 32px 24px; text-align: center; border: 1px solid var(--ink-line); position: relative; }
+  .stat-hero::before {
+    content: '積中'; position: absolute; top: -11px; left: 50%; transform: translateX(-50%);
+    background: var(--paper); padding: 0 12px; font-size: 12px; letter-spacing: 4px; color: var(--cinnabar); font-weight: 500;
+  }
+  .stat-hero .sh-rate { font-size: 60px; font-weight: 700; letter-spacing: -2px; line-height: 1; color: var(--ink); }
+  .stat-hero .sh-rate span { font-size: 28px; }
+  .stat-hero .sh-detail { font-size: 13px; color: var(--ink-3); margin-top: 16px; letter-spacing: 1px; }
+  .stat-bar { height: 4px; background: var(--paper-3); margin-top: 20px; overflow: hidden; }
+  .stat-bar .sb-fill { height: 100%; background: var(--cinnabar); }
+
+  .cat-stats { display: flex; margin: 20px 32px 8px; border: 1px solid var(--ink-line); }
+  .cat-stat { flex: 1; padding: 18px 8px; text-align: center; border-right: 1px solid var(--ink-line); }
+  .cat-stat:last-child { border-right: none; }
+  .cat-stat .cs-hanja { font-size: 20px; font-weight: 600; color: var(--cinnabar); }
+  .cat-stat .cs-rate { font-size: 20px; font-weight: 700; margin-top: 8px; }
+  .cat-stat .cs-label { font-size: 11px; color: var(--ink-3); margin-top: 4px; letter-spacing: 1px; }
+
+  .record-list { padding: 8px 32px 48px; }
+  .record-item { display: flex; align-items: flex-start; gap: 14px; padding: 20px 0; border-bottom: 1px solid var(--ink-line); }
+  .record-item .ri-verdict {
+    font-size: 15px; font-weight: 700; flex-shrink: 0; margin-top: 2px;
+    width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+    border: 1.5px solid; border-radius: 4px;
+  }
+  .record-item .ri-body { flex: 1; min-width: 0; }
+  .record-item .ri-q { font-size: 15px; font-weight: 600; line-height: 1.5; letter-spacing: 0.3px; }
+  .record-item .ri-date { font-size: 12px; color: var(--ink-3); margin-top: 5px; letter-spacing: 0.5px; }
+  .record-item .ri-check { margin-top: 12px; display: flex; gap: 10px; }
+  .ri-check button {
+    font-size: 12px; font-weight: 600; padding: 7px 16px; letter-spacing: 1px;
+    border: 1px solid var(--ink-line); background: var(--paper); color: var(--ink-2);
+    cursor: pointer; font-family: var(--font-serif);
+  }
+  .ri-check button.sel-hit { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .ri-check button.sel-miss { background: var(--cinnabar); color: var(--paper); border-color: var(--cinnabar); }
+  .ri-result-tag { font-size: 12px; font-weight: 600; margin-top: 10px; letter-spacing: 1px; }
+  .ri-result-tag.hit { color: var(--ink); }
+  .ri-result-tag.miss { color: var(--cinnabar); }
+
+  /* 하단 탭 */
+  .bottom-nav {
+    display: flex; border-top: 1px solid var(--ink-line); background: var(--paper);
+    padding-bottom: env(safe-area-inset-bottom); position: sticky; bottom: 0; z-index: 20;
+  }
+  .nav-item {
+    flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px;
+    padding: 14px 0 16px; cursor: pointer; color: var(--ink-3); font-size: 11px; letter-spacing: 2px; font-weight: 500;
+  }
+  .nav-item .nav-ic { font-size: 18px; font-weight: 600; }
+  .nav-item.active { color: var(--cinnabar); }
+
+  /* 토스트 */
+  .toast {
+    position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--ink); color: var(--paper); padding: 13px 24px;
+    font-size: 13px; font-weight: 500; letter-spacing: 1px; opacity: 0; pointer-events: none;
+    transition: all .3s; z-index: 100; white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* 모달 */
+  .modal-scrim { position: fixed; inset: 0; background: rgba(33,29,24,0.6); display: none; align-items: flex-end; justify-content: center; z-index: 200; }
+  .modal-scrim.active { display: flex; }
+  .modal {
+    width: 100%; max-width: 420px; background: var(--paper);
+    padding: 36px 32px calc(32px + env(safe-area-inset-bottom));
+    animation: slideUp .3s ease; text-align: center;
+  }
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  .modal .m-seal {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 56px; height: 56px; background: var(--cinnabar); margin-bottom: 20px;
+  }
+  .modal .m-seal span { font-size: 30px; color: var(--paper); font-weight: 700; }
+  .modal h2 { font-size: 22px; font-weight: 600; letter-spacing: 4px; }
+  .modal .m-sub { color: var(--ink-2); font-size: 14px; margin-top: 14px; line-height: 1.8; letter-spacing: 0.5px; }
+  .modal .m-features { margin: 28px 0; display: flex; flex-direction: column; gap: 18px; text-align: left; }
+  .m-feature { display: flex; gap: 14px; align-items: flex-start; }
+  .m-feature .mf-hanja { font-size: 22px; font-weight: 600; color: var(--cinnabar); width: 30px; text-align: center; flex-shrink: 0; }
+  .m-feature .mf-text strong { font-weight: 600; font-size: 15px; letter-spacing: 0.5px; }
+  .m-feature .mf-text span { color: var(--ink-3); font-size: 13px; display: block; margin-top: 3px; letter-spacing: 0.3px; }
+  .m-price-row { display: flex; align-items: baseline; gap: 6px; justify-content: center; margin: 8px 0 24px; }
+  .m-price-row .mp-num { font-size: 30px; font-weight: 700; }
+  .m-price-row .mp-unit { font-size: 15px; color: var(--ink-2); }
+  .modal .m-close { margin-top: 18px; font-size: 13px; color: var(--ink-3); cursor: pointer; letter-spacing: 1px; }
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <div class="topbar" id="topbar">
+    <div class="back" id="backBtn" style="visibility:hidden">‹</div>
+    <div class="title" id="topTitle"></div>
+    <div class="spacer"></div>
+  </div>
+
+  <!-- ===== 홈 ===== -->
+  <div class="screen active" id="screen-home">
+    <div class="home-hero home-hero-toss">
+      <div class="hero-dosang" aria-hidden="true" id="heroDosang"></div>
+      <div class="hero-row">
+        <div class="hero-copy">
+          <div class="brand-mark"><span class="brand-dot"></span>타점</div>
+          <h1 class="home-title">결정이 어려운 순간,<br>답을 정해드려요.</h1>
+        </div>
+      </div>
+      <p class="home-desc">망설이는 그 선택, 천 년을 이어온 동양의 점법<br>육임으로 명확하게. 결과는 적중률로 증명돼요.</p>
+    </div>
+
+    <div class="pad">
+      <div class="cat-section">
+        <div class="cat-section-head">
+          <h2>지금 무엇이 고민인가요?</h2>
+          <p>고민의 갈래를 고르면, 그에 맞춰 점을 칩니다</p>
+        </div>
+        <div class="cat-grid">
+          <div class="cat-card" onclick="startInput('love')">
+            <div class="cat-hanja">情</div>
+            <div class="cat-text"><h3>연애 · 관계</h3><p>연락 · 만남 · 고백 · 이별</p></div>
+            <div class="cat-arrow">›</div>
+          </div>
+          <div class="cat-card" onclick="startInput('money')">
+            <div class="cat-hanja">財</div>
+            <div class="cat-text"><h3>돈 · 커리어</h3><p>이직 · 투자 · 거래 · 큰 지출</p></div>
+            <div class="cat-arrow">›</div>
+          </div>
+          <div class="cat-card" onclick="startInput('daily')">
+            <div class="cat-hanja">擇</div>
+            <div class="cat-text"><h3>일상 선택</h3><p>시작 · 중단 · 지금 · 나중</p></div>
+            <div class="cat-arrow">›</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-label">육 임 이 란</div>
+      <div class="about-liuren">
+        <p class="al-lead">육임(六壬)은 <strong>천 년 넘게 이어져 온 동양의 점법</strong>으로, 사주·타로와 달리 <strong>'지금 이 순간'의 물음에 답하는</strong> 데 특화되어 있습니다.</p>
+        <div class="al-points">
+          <div class="al-point">
+            <div class="al-hanja">時</div>
+            <div class="al-text"><strong>때를 읽는 점</strong><span>질문을 던진 바로 그 시각의 기운으로 점괘를 세워, "언제·할지 말지"를 가립니다.</span></div>
+          </div>
+          <div class="al-point">
+            <div class="al-hanja">彼</div>
+            <div class="al-text"><strong>상대를 세우는 점</strong><span>나뿐 아니라 상대·상황을 각각의 자리로 세워, 관계의 국면까지 봅니다.</span></div>
+          </div>
+          <div class="al-point">
+            <div class="al-hanja">中</div>
+            <div class="al-text"><strong>맞으면 남기는 점</strong><span>타점은 모든 예측을 기록하고, 맞았는지 검증해 적중률로 신뢰를 증명합니다.</span></div>
+          </div>
+        </div>
+        <p class="al-note">사과삼전(四課三傳)이라는 정통 계산법으로 괘를 세우기에, 같은 물음·같은 시각이면 늘 같은 답이 나옵니다. 기분에 따라 달라지지 않는, 재현되는 점법입니다.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 입력 ===== -->
+  <div class="screen" id="screen-input">
+    <div class="input-head">
+      <div class="cat-badge" id="inputCatBadge">情 연애 · 관계</div>
+      <h2 id="inputPrompt">무엇을 묻고자 하십니까</h2>
+      <div class="sub">마음속 고민을 한 문장으로 적으세요</div>
+    </div>
+    <div class="q-box">
+      <textarea class="q-input" id="qInput" maxlength="200"
+        placeholder="헤어진 그 사람에게&#10;다시 연락해도 될까?" oninput="onQInput()"></textarea>
+      <div class="char-count"><span id="charCount">0</span> / 200</div>
+    </div>
+    <div class="example-chips" id="exampleChips"></div>
+
+    <div class="ipt-meta">
+      <div class="meta-row meta-time">
+        <div class="meta-left">
+          <div class="meta-hanja">時</div>
+          <div class="meta-text">
+            <strong>점시(占時)</strong>
+            <span id="occhoTime">지금 시각으로 점을 세웁니다</span>
+          </div>
+        </div>
+        <div class="meta-badge">자동</div>
+      </div>
+
+      <div class="meta-row meta-birth" id="birthRow" onclick="toggleBirth()">
+        <div class="meta-left">
+          <div class="meta-hanja">命</div>
+          <div class="meta-text">
+            <strong>생년월일</strong>
+            <span id="birthLabel">넣으면 풀이가 더 정밀해져요 · 선택</span>
+          </div>
+        </div>
+        <div class="meta-arrow" id="birthArrow">＋</div>
+      </div>
+      <div class="birth-fields" id="birthFields">
+        <input type="date" id="birthDate" class="birth-input" onchange="onBirthChange()">
+        <select id="birthTime" class="birth-input" onchange="onBirthChange()">
+          <option value="">태어난 시(모르면 비워두세요)</option>
+          <option value="子">자시 (23~01시)</option>
+          <option value="丑">축시 (01~03시)</option>
+          <option value="寅">인시 (03~05시)</option>
+          <option value="卯">묘시 (05~07시)</option>
+          <option value="辰">진시 (07~09시)</option>
+          <option value="巳">사시 (09~11시)</option>
+          <option value="午">오시 (11~13시)</option>
+          <option value="未">미시 (13~15시)</option>
+          <option value="申">신시 (15~17시)</option>
+          <option value="酉">유시 (17~19시)</option>
+          <option value="戌">술시 (19~21시)</option>
+          <option value="亥">해시 (21~23시)</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="flex:1"></div>
+    <div class="cta-wrap">
+      <button class="btn btn-primary" id="castBtn" disabled onclick="castLiuren()">점 을 치 다</button>
+    </div>
+  </div>
+
+  <!-- ===== 점 치는 중 ===== -->
+  <div class="screen" id="screen-casting">
+    <div class="casting">
+      <div class="cast-plate">
+        <div class="plate-ring plate-earth" id="plateEarth"></div>
+        <div class="plate-ring plate-heaven" id="plateHeaven"></div>
+        <div class="plate-core"></div>
+      </div>
+      <div class="cast-text">
+        <div class="l1" id="castL1">점시(占時)를 세웁니다</div>
+        <div class="l2" id="castL2">지금 이 순간의 간지를 헤아립니다</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 결과 ===== -->
+  <div class="screen" id="screen-result">
+    <div class="result-hero" id="resultHero">
+      <div class="verdict-hanja" id="verdictHanja">否</div>
+      <div class="verdict-main" id="verdictMain">지금은 하지 마십시오</div>
+      <div class="verdict-sub" id="verdictSub"></div>
+      <div class="hero-rule"></div>
+    </div>
+
+    <div class="q-recall">
+      <span>물 음</span>
+      <div id="qRecallText"></div>
+    </div>
+
+    <div class="premium-block">
+      <div class="premium-card locked" id="pcReason">
+        <div class="premium-header"><div class="ph-hanja">課</div><h3>어찌하여 이런 답인가</h3><div class="ph-tag">打點＋</div></div>
+        <div class="premium-body" id="reasonBody"></div>
+        <div class="lock-overlay"><div class="lock-seal">打點＋ 에서 열림</div></div>
+      </div>
+    </div>
+
+    <div class="premium-block">
+      <div class="premium-card locked" id="pcTiming">
+        <div class="premium-header"><div class="ph-hanja">時</div><h3>그렇다면 언제가 좋은가</h3><div class="ph-tag">打點＋</div></div>
+        <div class="premium-body" id="timingBody"></div>
+        <div class="lock-overlay"><div class="lock-seal">打點＋ 에서 열림</div></div>
+      </div>
+    </div>
+
+    <div class="premium-block">
+      <div class="premium-card locked" id="pcRelation">
+        <div class="premium-header"><div class="ph-hanja">彼</div><h3>상대의 마음은 어떠한가</h3><div class="ph-tag">打點＋</div></div>
+        <div class="premium-body" id="relationBody"></div>
+        <div class="lock-overlay"><div class="lock-seal">打點＋ 에서 열림</div></div>
+      </div>
+    </div>
+
+    <div class="paywall-cta" id="paywallCta">
+      <h3>打 點 ＋</h3>
+      <p>결단의 근거, 움직일 때, 상대의 속내까지<br>정통 육임의 깊은 풀이를 모두 엽니다</p>
+      <div class="pw-price"><span>이레(7일) 무료</span> · 이후 월 4,900원</div>
+      <button onclick="openPaywall()">무 료 로 열 기</button>
+      <div class="pw-note">언제든 그만둘 수 있습니다</div>
+    </div>
+
+    <div class="disclaimer">
+      타점은 결정을 돕는 참고용 서비스입니다<br>마지막 선택과 책임은 언제나 당신에게 있습니다
+    </div>
+
+    <div class="result-actions">
+      <button class="btn btn-ghost" onclick="goHome()">다시 묻기</button>
+      <button class="btn btn-ghost" onclick="shareResult()">간직하기</button>
+    </div>
+  </div>
+
+  <!-- ===== 기록 ===== -->
+  <div class="screen" id="screen-record">
+    <div class="stat-hero">
+      <div class="sh-rate"><span id="rateNumFull">74.5</span><span>%</span></div>
+      <div class="sh-detail" id="rateDetail">마흔일곱 번 물어 서른다섯 번 맞음</div>
+      <div class="stat-bar"><div class="sb-fill" id="statFill" style="width:74.5%"></div></div>
+    </div>
+
+    <div class="cat-stats">
+      <div class="cat-stat"><div class="cs-hanja">情</div><div class="cs-rate">78%</div><div class="cs-label">연애</div></div>
+      <div class="cat-stat"><div class="cs-hanja">財</div><div class="cs-rate">71%</div><div class="cs-label">돈·커리어</div></div>
+      <div class="cat-stat"><div class="cs-hanja">擇</div><div class="cs-rate">69%</div><div class="cs-label">일상</div></div>
+    </div>
+
+    <div class="section-label">나 의 점 사 기 록</div>
+    <div class="record-list" id="recordList"></div>
+  </div>
+
+  <div class="bottom-nav" id="bottomNav">
+    <div class="nav-item active" data-nav="home" onclick="goHome()"><div class="nav-ic">占</div>점 치 기</div>
+    <div class="nav-item" data-nav="record" onclick="goRecord()"><div class="nav-ic">錄</div>내 기 록</div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="modal-scrim" id="modalScrim">
+  <div class="modal">
+    <div class="m-seal"><span>＋</span></div>
+    <h2>打 點 ＋</h2>
+    <p class="m-sub">망설임 없이, 더 깊고 정확하게<br>정통 육임의 모든 풀이를 엽니다</p>
+    <div class="m-features">
+      <div class="m-feature"><div class="mf-hanja">課</div><div class="mf-text"><strong>결단의 근거</strong><span>사과삼전으로 답의 이유를 풀어드립니다</span></div></div>
+      <div class="m-feature"><div class="mf-hanja">時</div><div class="mf-text"><strong>움직일 때</strong><span>언제가 좋은지, 흐름은 어떠한지</span></div></div>
+      <div class="m-feature"><div class="mf-hanja">彼</div><div class="mf-text"><strong>상대의 속내</strong><span>그 사람은 지금 어떤 국면에 있는지</span></div></div>
+    </div>
+    <div class="m-price-row"><span class="mp-num">4,900원</span><span class="mp-unit">/ 월</span></div>
+    <button class="btn btn-primary" style="background:var(--cinnabar);color:var(--paper)" onclick="activatePremium()">이레(7일) 무료로 시작</button>
+    <div class="m-close" onclick="closePaywall()">다음에 하겠습니다</div>
+  </div>
+</div>
+
+<script>
+  let state = { currentCat: null, currentQuestion: '', isPremium: false, lastResult: null, birthDate: '', birthTime: '' };
+
+  const CATEGORIES = {
+    love:  { hanja: '情', name: '연애 · 관계', prompt: '어떤 인연을 묻습니까' },
+    money: { hanja: '財', name: '돈 · 커리어', prompt: '어떤 셈을 묻습니까' },
+    daily: { hanja: '擇', name: '일상 선택', prompt: '어떤 갈림길에 섰습니까' },
+  };
+
+  const EXAMPLES = {
+    love:  ['먼저 연락할까?', '고백해도 될까?', '헤어지는 게 맞을까?', '다시 만나자 할까?'],
+    money: ['지금 이직할까?', '이것을 지금 살까?', '이 일을 벌일까?', '저 사람과 손잡을까?'],
+    daily: ['오늘 갈까 말까?', '이 일 계속할까?', '지금 시작할까?', '그만둘까?'],
+  };
+
+  const MOCK_RESULTS = {
+    love: {
+      verdict: 'no', hanja: '否', main: '지금은 하지 마십시오',
+      sub: '상대의 자리가 지금은 닫혀 있습니다\n조급함이 도리어 멀어지게 합니다',
+      reason: '이번 점의 <strong>상대 자리(간상신)</strong>에 든 신(神)은 \'휴(休)\' — 물러나 쉬려는 국면입니다. 지금 다가서면 상대에게는 <strong>부담</strong>으로 읽힙니다. 당신의 자리는 오히려 왕성하나, 그 기운이 지금은 어긋나 만나는 배치입니다.',
+      timing: '상대 자리의 흐름은 <strong>두어 주 뒤</strong>부터 바뀝니다. 그때 다시 물으면 \'생(生)\'의 국면으로 접어들 조짐이 있습니다. 지금 서두르기보다 <strong>흐름이 열리는 때</strong>를 기다림이 이롭습니다.',
+      relation: '상대는 당신이 싫어진 것이 아니라 <strong>다른 일에 마음의 여력이 없는</strong> 상태입니다. 인연이 끊긴 것이 아니라 \'잠시 멈춤\'에 가깝습니다. 지금은 기다림이 곧 배려가 됩니다.',
+    },
+    money: {
+      verdict: 'wait', hanja: '待', main: '조금 더 기다리십시오',
+      sub: '방향은 옳으나 때가 이릅니다\n아직 판이 여물지 않았습니다',
+      reason: '<strong>재(財)의 자리</strong>는 분명히 살아 있습니다 — 이 선택 자체가 그른 것은 아닙니다. 다만 삼전(三傳)의 흐름이 아직 <strong>초전에 머물러</strong> 있어, 지금 움직이면 힘을 다 펴기 전에 소모됩니다. 결과는 좋되 때가 이르다는 배치입니다.',
+      timing: '<strong>다음 달 중순 이후</strong>부터 중전·말전으로 흐름이 넘어갑니다. 그 구간에서 정하면 판단과 운의 결이 맞아떨어집니다. 지금은 <strong>더 살피고 조건을 다듬는</strong> 때로 쓰십시오.',
+      relation: '상대(혹은 거래처)의 자리는 아직 <strong>실체가 옅습니다(허·虛)</strong>. 지금 맺으면 주도권이 그쪽으로 쏠립니다. 움직인다면 <strong>당신이 조건과 결정권을 쥐는</strong> 형태에서만 하십시오.',
+    },
+    daily: {
+      verdict: 'yes', hanja: '可', main: '지금 하십시오',
+      sub: '흐름이 당신의 편입니다\n망설일수록 기회가 옅어집니다',
+      reason: '<strong>일간(日干) — 당신의 자리</strong>가 왕(旺)하게 서 있고, 삼전의 흐름이 순하게 이어집니다. 마음은 이미 한쪽으로 기울어 있습니다. 점은 그 <strong>기울어진 방향이 옳음</strong>을 확인해줄 따름입니다.',
+      timing: '<strong>지금부터 며칠 안</strong>이 가장 좋은 구간입니다. 흐름은 시간이 갈수록 옅어지니, 미루면 같은 선택도 힘이 빠집니다. <strong>오늘 내일</strong> 사이에 첫발을 떼기를 권합니다.',
+      relation: '주변의 자리(사람·환경)도 당신을 <strong>생(生)해주는</strong> 배치입니다. 지금 움직이면 뜻밖의 도움이 많습니다. 홀로 진다는 부담은 내려놓아도 좋습니다.',
+    },
+  };
+
+  const CAST_MESSAGES = [
+    { l1: '점시(占時)를 세웁니다', l2: '지금 이 순간의 간지를 헤아립니다' },
+    { l1: '천지반(天地盤)을 돌립니다', l2: '월장을 얹어 천반을 자리잡습니다' },
+    { l1: '사과삼전(四課三傳)을 세웁니다', l2: '당신과 상대의 자리를 벌이고 흐름을 뽑습니다' },
+    { l1: '결단을 새깁니다', l2: '오늘의 말로 옮기고 있습니다' },
+  ];
+
+  function showScreen(id, title, showBack) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-' + id).classList.add('active');
+    document.getElementById('topTitle').textContent = title || '';
+    document.getElementById('backBtn').style.visibility = showBack ? 'visible' : 'hidden';
+    document.getElementById('screen-' + id).scrollTop = 0;
+    document.getElementById('bottomNav').style.display = (id === 'input' || id === 'casting') ? 'none' : 'flex';
+  }
+  function setNav(active) {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.nav === active));
+  }
+  function goHome() { showScreen('home', '', false); setNav('home'); }
+  function goRecord() { renderRecords(); showScreen('record', '내 기록', false); setNav('record'); }
+
+  document.getElementById('backBtn').onclick = () => goHome();
+
+  function startInput(cat) {
+    state.currentCat = cat;
+    const c = CATEGORIES[cat];
+    document.getElementById('inputCatBadge').textContent = c.hanja + ' ' + c.name;
+    document.getElementById('inputPrompt').textContent = c.prompt;
+    document.getElementById('qInput').value = '';
+    document.getElementById('charCount').textContent = '0';
+    document.getElementById('castBtn').disabled = true;
+    const chipWrap = document.getElementById('exampleChips');
+    chipWrap.innerHTML = '';
+    EXAMPLES[cat].forEach(ex => {
+      const chip = document.createElement('div');
+      chip.className = 'chip'; chip.textContent = ex;
+      chip.onclick = () => { document.getElementById('qInput').value = ex; onQInput(); };
+      chipWrap.appendChild(chip);
+    });
+    showScreen('input', c.name, true);
+    updateOcchoTime();
+    document.getElementById('birthFields').classList.remove('open');
+    document.getElementById('birthArrow').textContent = '＋';
+    setTimeout(() => document.getElementById('qInput').focus(), 300);
+  }
+
+  // 점시(占時) — 지금 시각 자동 표시
+  const EARTHLY = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+  function updateOcchoTime() {
+    const now = new Date();
+    const M = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'][now.getMonth()];
+    const d = now.getDate();
+    const hh = now.getHours(), mm = String(now.getMinutes()).padStart(2,'0');
+    // 시지(時支): 23~01=子, 이후 2시간 단위
+    const branchIdx = Math.floor(((now.getHours() + 1) % 24) / 2);
+    const branch = EARTHLY[branchIdx];
+    const el = document.getElementById('occhoTime');
+    if (el) el.textContent = `${M} ${d}일 ${hh}시 ${mm}분 · ${branch}시(時)`;
+  }
+
+  function toggleBirth() {
+    const f = document.getElementById('birthFields');
+    const open = f.classList.toggle('open');
+    document.getElementById('birthArrow').textContent = open ? '－' : '＋';
+  }
+
+  function onBirthChange() {
+    const date = document.getElementById('birthDate').value;
+    const time = document.getElementById('birthTime').value;
+    state.birthDate = date; state.birthTime = time;
+    const label = document.getElementById('birthLabel');
+    if (date) {
+      const t = time ? ` · ${time}시` : '';
+      label.textContent = `${date}${t} 반영됨`;
+    } else {
+      label.textContent = '넣으면 풀이가 더 정밀해져요 · 선택';
+    }
+  }
+
+  function onQInput() {
+    const val = document.getElementById('qInput').value;
+    document.getElementById('charCount').textContent = val.length;
+    document.getElementById('castBtn').disabled = val.trim().length < 2;
+  }
+
+  function castLiuren() {
+    state.currentQuestion = document.getElementById('qInput').value.trim();
+    document.getElementById('qInput').blur();
+    showScreen('casting', '', false);
+    let step = 0;
+    const l1 = document.getElementById('castL1'), l2 = document.getElementById('castL2');
+    l1.textContent = CAST_MESSAGES[0].l1; l2.textContent = CAST_MESSAGES[0].l2;
+    const interval = setInterval(() => {
+      step++;
+      if (step >= CAST_MESSAGES.length) { clearInterval(interval); showResult(); return; }
+      l1.textContent = CAST_MESSAGES[step].l1; l2.textContent = CAST_MESSAGES[step].l2;
+    }, 750);
+  }
+
+  const VERDICT_CLASS = { yes: 'v-yes', no: 'v-no', wait: 'v-wait' };
+
+  function showResult() {
+    const r = MOCK_RESULTS[state.currentCat];
+    state.lastResult = { ...r, question: state.currentQuestion, cat: state.currentCat };
+    const hero = document.getElementById('resultHero');
+    hero.className = 'result-hero ' + VERDICT_CLASS[r.verdict];
+    document.getElementById('verdictHanja').textContent = r.hanja;
+    document.getElementById('verdictMain').textContent = r.main;
+    document.getElementById('verdictSub').innerHTML = r.sub.replace(/\n/g, '<br>');
+    document.getElementById('qRecallText').textContent = state.currentQuestion;
+    document.getElementById('reasonBody').innerHTML = r.reason;
+    document.getElementById('timingBody').innerHTML = r.timing;
+    document.getElementById('relationBody').innerHTML = r.relation;
+    applyPremiumState();
+    showScreen('result', '', true);
+  }
+
+  function applyPremiumState() {
+    const locked = !state.isPremium;
+    ['pcReason', 'pcTiming', 'pcRelation'].forEach(id => document.getElementById(id).classList.toggle('locked', locked));
+    document.getElementById('paywallCta').style.display = locked ? 'block' : 'none';
+  }
+
+  function openPaywall() { document.getElementById('modalScrim').classList.add('active'); }
+  function closePaywall() { document.getElementById('modalScrim').classList.remove('active'); }
+  function activatePremium() { state.isPremium = true; closePaywall(); applyPremiumState(); showToast('打點＋ 이레 무료 체험이 시작되었습니다'); }
+  function shareResult() { showToast('점사가 간직되었습니다'); }
+
+  let RECORDS = [
+    { verdict: 'no', q: '그 사람한테 먼저 연락할까?', date: '이틀 전', cat: 'love', result: 'hit' },
+    { verdict: 'yes', q: '이 프로젝트 지금 시작할까?', date: '닷새 전', cat: 'daily', result: 'hit' },
+    { verdict: 'wait', q: '지금 이직 제안 받아들일까?', date: '한 주 전', cat: 'money', result: null },
+    { verdict: 'yes', q: '오늘 그 모임에 나갈까?', date: '한 주 전', cat: 'daily', result: 'miss' },
+    { verdict: 'no', q: '이 주식 지금 살까?', date: '두 주 전', cat: 'money', result: 'hit' },
+  ];
+
+  const V_HANJA = { yes: '可', no: '否', wait: '待' };
+  const V_CLASS = { yes: 'r-yes', no: 'r-no', wait: 'r-wait' };
+  const CAT_HANJA = { love: '情', money: '財', daily: '擇' };
+
+  function renderRecords() {
+    const list = document.getElementById('recordList');
+    list.innerHTML = '';
+    RECORDS.forEach((rec, idx) => {
+      const item = document.createElement('div');
+      item.className = 'record-item';
+      let checkHtml;
+      if (rec.result === 'hit') checkHtml = '<div class="ri-result-tag hit">맞았습니다</div>';
+      else if (rec.result === 'miss') checkHtml = '<div class="ri-result-tag miss">빗나갔습니다</div>';
+      else checkHtml = `<div class="ri-check">
+          <button onclick="markResult(${idx}, 'hit')">맞았어요</button>
+          <button onclick="markResult(${idx}, 'miss')">빗나갔어요</button></div>`;
+      item.innerHTML = `
+        <div class="ri-verdict ${V_CLASS[rec.verdict]}">${V_HANJA[rec.verdict]}</div>
+        <div class="ri-body">
+          <div class="ri-q">${rec.q}</div>
+          <div class="ri-date">${CAT_HANJA[rec.cat]} · ${rec.date}</div>
+          ${checkHtml}
+        </div>`;
+      list.appendChild(item);
+    });
+  }
+
+  function markResult(idx, result) {
+    RECORDS[idx].result = result;
+    updateStats(); renderRecords();
+    showToast(result === 'hit' ? '적중으로 새겼습니다' : '빗나감으로 새겼습니다');
+  }
+
+  function updateStats() {
+    const baseTotal = 47, baseHit = 35;
+    const checked = RECORDS.filter(r => r.result);
+    const hits = RECORDS.filter(r => r.result === 'hit').length;
+    const total = baseTotal + checked.length;
+    const totalHit = baseHit + hits;
+    const rate = (totalHit / total * 100).toFixed(1);
+    document.getElementById('rateNumFull').textContent = rate;
+    document.getElementById('rateDetail').textContent = `${total}번 물어 ${totalHit}번 맞음`;
+    document.getElementById('statFill').style.width = rate + '%';
+  }
+
+  let toastTimer;
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+  }
+
+  document.getElementById('modalScrim').addEventListener('click', (e) => { if (e.target.id === 'modalScrim') closePaywall(); });
+
+  // 식반(式盤) 십이지 원형 배치
+  function buildPlate() {
+    const branches = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+    const earth = document.getElementById('plateEarth');
+    const heaven = document.getElementById('plateHeaven');
+    if (!earth || earth.dataset.built) return;
+    const place = (el, radius, isHeaven) => {
+      branches.forEach((b, i) => {
+        const angle = (i / 12) * 2 * Math.PI - Math.PI / 2;
+        const x = 50 + Math.cos(angle) * radius;
+        const y = 50 + Math.sin(angle) * radius;
+        const g = document.createElement('span');
+        g.className = 'glyph';
+        g.textContent = b;
+        g.style.left = x + '%';
+        g.style.top = y + '%';
+        if (!isHeaven) g.style.transform = 'translate(-50%,-50%)';
+        el.appendChild(g);
+      });
+    };
+    place(earth, 42, false);   // 지반: 바깥 고정
+    place(heaven, 38, true);   // 천반: 안쪽 회전
+    earth.dataset.built = '1';
+  }
+  buildPlate();
+
+  // 홈 히어로 도상: 팔괘 + 천간 + 오행 + 태극 (주사/먹)
+  function buildHeroDosang() {
+    const el = document.getElementById('heroDosang');
+    if (!el || el.dataset.built) return;
+    const line = '#a8352a', glyph = '#211d18', taijiLight = '#f2ede1', taijiDark = '#a8352a';
+    const C = 130;
+    const TRIGRAMS = [
+      [1,0,1],[0,0,0],[1,1,0],[1,1,1],[0,1,0],[0,0,1],[1,0,0],[0,1,1]
+    ];
+    const STEMS = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
+    const ELEMENTS = ['木','火','土','金','水'];
+    const trigram = (cx, cy, lines, len, gap, thick) => {
+      let s = '';
+      lines.forEach((yang, i) => {
+        const y = cy - gap + i * gap;
+        if (yang) s += `<rect x="${cx-len/2}" y="${y-thick/2}" width="${len}" height="${thick}" fill="${glyph}"/>`;
+        else {
+          const seg = len*0.42;
+          s += `<rect x="${cx-len/2}" y="${y-thick/2}" width="${seg}" height="${thick}" fill="${glyph}"/>`;
+          s += `<rect x="${cx+len/2-seg}" y="${y-thick/2}" width="${seg}" height="${thick}" fill="${glyph}"/>`;
+        }
+      });
+      return s;
+    };
+    let svg = `<svg viewBox="0 0 260 260" width="100%" height="100%">`;
+    svg += `<circle cx="${C}" cy="${C}" r="126" fill="none" stroke="${line}" stroke-width="2.5"/>`;
+    svg += `<circle cx="${C}" cy="${C}" r="120" fill="none" stroke="${line}" stroke-width="1"/>`;
+    svg += `<circle cx="${C}" cy="${C}" r="98" fill="none" stroke="${line}" stroke-width="1"/>`;
+    for (let i=0;i<8;i++){
+      const a = (i/8)*2*Math.PI - Math.PI/2 + Math.PI/8;
+      svg += `<line x1="${C+Math.cos(a)*98}" y1="${C+Math.sin(a)*98}" x2="${C+Math.cos(a)*120}" y2="${C+Math.sin(a)*120}" stroke="${line}" stroke-width="0.8"/>`;
+    }
+    TRIGRAMS.forEach((tg, i) => {
+      const a = (i/8)*2*Math.PI - Math.PI/2;
+      svg += trigram(C+Math.cos(a)*109, C+Math.sin(a)*109, tg, 20, 5.5, 3);
+    });
+    svg += `<circle cx="${C}" cy="${C}" r="80" fill="none" stroke="${line}" stroke-width="0.9"/>`;
+    STEMS.forEach((s2, i) => {
+      const a = (i/10)*2*Math.PI - Math.PI/2;
+      svg += `<text x="${C+Math.cos(a)*89}" y="${C+Math.sin(a)*89}" text-anchor="middle" dominant-baseline="central" font-size="12" fill="${glyph}" font-family="'Noto Serif KR',serif" font-weight="500">${s2}</text>`;
+    });
+    svg += `<circle cx="${C}" cy="${C}" r="62" fill="none" stroke="${line}" stroke-width="0.9"/>`;
+    ELEMENTS.forEach((e, i) => {
+      const a = (i/5)*2*Math.PI - Math.PI/2;
+      svg += `<text x="${C+Math.cos(a)*50}" y="${C+Math.sin(a)*50}" text-anchor="middle" dominant-baseline="central" font-size="19" fill="${glyph}" font-family="'Noto Serif KR',serif" font-weight="700">${e}</text>`;
+    });
+    const T = 30;
+    svg += `<circle cx="${C}" cy="${C}" r="${T}" fill="none" stroke="${line}" stroke-width="1.4"/>`;
+    svg += `<path d="M${C} ${C-T} A${T} ${T} 0 0 1 ${C} ${C+T} A${T/2} ${T/2} 0 0 1 ${C} ${C} A${T/2} ${T/2} 0 0 0 ${C} ${C-T} Z" fill="${taijiDark}"/>`;
+    svg += `<circle cx="${C}" cy="${C-T/2}" r="5" fill="${taijiLight}"/>`;
+    svg += `<circle cx="${C}" cy="${C+T/2}" r="5" fill="${taijiDark}"/>`;
+    svg += `</svg>`;
+    el.innerHTML = svg;
+    el.dataset.built = '1';
+  }
+  buildHeroDosang();
+
+  goHome();
+</script>
+</body>
+</html>
